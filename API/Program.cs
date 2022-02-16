@@ -109,4 +109,8 @@ app.MapPost("/api/employees/savefile", async (HttpContext ctx, IWebHostEnvironme
     }
 });
 
+// Testing if api works
+// GET /test
+app.MapGet("/test", () => "Hello, world!");
+
 app.Run();
