@@ -1,5 +1,7 @@
 # mongo-aspnetcore-angular API
 
+Little app to manage employee and department, for demo purposes using MongoDB, Asp.net 6 with the new minimal API and Angular 13.
+
 ## install
 
 1. To get started we will need to install dotnet SDK 6.0 you can find it here <https://dotnet.microsoft.com/en-us/download/dotnet/6.0>.
