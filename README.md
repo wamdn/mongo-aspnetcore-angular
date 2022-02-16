@@ -1,4 +1,4 @@
 # mongo-aspnetcore-angular API
-<hr>
+
 ## install
 
