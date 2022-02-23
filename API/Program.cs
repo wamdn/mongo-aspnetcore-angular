@@ -68,7 +68,7 @@ app.MapGet("/api/employees/{id:regex(^[0-9a-f]{{24}}$)}", async (string id, Empl
     await empService.GetAsync(id));
 
 // POST /api/employees
-app.MapPost("/api/employees", async (Employee emp, EmployeeService empService) =>
+app.MapPost("/api/employees", async (Employee emp, HttpContext ctx, EmployeeService empService) => 
     await empService.CreateAsync(emp));
 
 // PUT /api/employees
@@ -80,17 +80,32 @@ app.MapDelete("/api/employees/{id:regex(^[0-9a-f]{{24}}$)}", async (string id, E
     await empService.DeleteAsync(id));
 
 // POST /api/employees/savefile
-app.MapPost("/api/employees/savefile", async (HttpContext ctx, IWebHostEnvironment env) =>
+app.MapPost("/api/employees/savefile/{id:regex(^[0-9a-f]{{24}}$)?}", async (string? id, EmployeeService empService, HttpContext ctx, IWebHostEnvironment env) =>
 {
     try
     {
         if (!ctx.Request.Form.Files.Any()) 
             throw new InvalidOperationException();
 
+        // If we have an id, query employee get the previous imageName
+        // Delete image from the Photos file
+        string photoDirectory = Path.Combine(env.WebRootPath, "Photos");
+
+        if (!string.IsNullOrEmpty(id))
+        {
+            Employee emp = await empService.GetAsync(id);
+            string imageToDelPath = Path.Combine(photoDirectory, emp.ImageName);
+            if (!string.IsNullOrEmpty(emp.ImageName) && File.Exists(imageToDelPath))
+            {
+                File.Delete(imageToDelPath);
+            }
+        }
+
+        // Save new image
         IFormFile photo = ctx.Request.Form.Files[0];
         string ext = Path.GetExtension(photo.FileName);
         string photoFileName = Guid.NewGuid().ToString() + ext;
-        string photoPath = Path.Combine(env.WebRootPath, "Photos", photoFileName);
+        string photoPath = Path.Combine(photoDirectory, photoFileName);
 
         using FileStream fs = new (photoPath, 
                                    FileMode.CreateNew, 
@@ -101,11 +116,36 @@ app.MapPost("/api/employees/savefile", async (HttpContext ctx, IWebHostEnvironme
 
         await photo.CopyToAsync(fs);
 
+        // Return imageName
         await ctx.Response.WriteAsJsonAsync(photoFileName);
     }
     catch
     {
-        await ctx.Response.WriteAsJsonAsync("anounymous.png");
+        await ctx.Response.WriteAsJsonAsync("");
+    }
+});
+
+// Delete /api/employees/image/{id}
+app.MapDelete("/api/employees/image/{id:regex(^[0-9a-f]{{24}}$)}", async (string id, EmployeeService empService, IWebHostEnvironment env) =>
+{
+    try
+    {
+        // If we have an id, query employee get the previous imageName
+        // Delete image from the Photos file
+        string photoDirectory = Path.Combine(env.WebRootPath, "Photos");
+
+        if (!string.IsNullOrEmpty(id))
+        {
+            Employee emp = await empService.GetAsync(id);
+            string imageToDelPath = Path.Combine(photoDirectory, emp.ImageName);
+            if (!string.IsNullOrEmpty(emp.ImageName) && File.Exists(imageToDelPath))
+            {
+                File.Delete(imageToDelPath);
+            }
+        }
+    }
+    catch
+    {
     }
 });
 

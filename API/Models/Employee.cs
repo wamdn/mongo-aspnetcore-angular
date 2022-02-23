@@ -22,5 +22,5 @@ public class Employee
     public DateTime DateOfJoining { get; set; }
 
     [BsonElement(elementName: "img")]
-    public string ImageName { get; set; } = "anonymous.png";
+    public string ImageName { get; set; } = "";
 }

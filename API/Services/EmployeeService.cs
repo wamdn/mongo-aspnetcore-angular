@@ -26,14 +26,16 @@ public class EmployeeService
     {
         return await _empCollection.Find(e => e.Id == id).FirstOrDefaultAsync();
     }
-    public async Task CreateAsync(Employee employee)
+    public async Task<Employee> CreateAsync(Employee employee)
     {
         if (employee.DateOfJoining == default)
             employee.DateOfJoining = DateTime.UtcNow;
 
         await _empCollection.InsertOneAsync(employee);
+
+        return employee;
     }
-    public async Task UpdateAsync(Employee employee)
+    public async Task<Employee> UpdateAsync(Employee employee)
     {
         var filter = Builders<Employee>.Filter.Eq("Id", employee.Id);
         Employee oldEmpData = await _empCollection.Find(e => e.Id == employee.Id).FirstOrDefaultAsync();
@@ -56,6 +58,7 @@ public class EmployeeService
                                               .Set("DateOfJoining", employee.DateOfJoining);
 
         await _empCollection.UpdateOneAsync(filter, update);
+        return employee;
     }
     public async Task DeleteAsync(string id)
     {

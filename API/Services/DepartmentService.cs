@@ -25,13 +25,15 @@ public class DepartmentService
     {
         return await _deptCollection.Find(d => d.Id == id).FirstOrDefaultAsync();
     }
-    public async Task CreateAsync(Department department)
+    public async Task<Department> CreateAsync(Department department)
     {
         await _deptCollection.InsertOneAsync(department);
+        return department;
     }
-    public async Task UpdateAsync(Department department)
+    public async Task<Department> UpdateAsync(Department department)
     {
         await _deptCollection.ReplaceOneAsync(d => d.Id == department.Id, department);
+        return department;
     }
     public async Task DeleteAsync(string id)
     {
